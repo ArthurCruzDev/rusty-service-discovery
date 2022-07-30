@@ -1,10 +1,14 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-use log::{debug, error, info, trace, warn};
+use actix_web::{web, App, HttpResponse, HttpServer};
+use log::info;
+use std::env;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     log4rs::init_file("log4rs.yml", Default::default()).unwrap();
 
-    let port_number = 80;
+    let port_number = env::var("RUSTYSE_PORT")
+        .unwrap_or_else(|_| "80".to_string())
+        .parse::<u16>()
+        .expect("Failed to parse server port from enviroment or from default \"80\"");
 
     info!(
         "Starting Rusty Service Discovery Server on port: {}",
