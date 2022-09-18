@@ -1,6 +1,11 @@
+mod apis;
+mod models;
+
 use actix_web::{web, App, HttpResponse, HttpServer};
+use apis::registration::register;
 use log::info;
 use std::env;
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     log4rs::init_file("log4rs.yml", Default::default()).unwrap();
@@ -15,8 +20,12 @@ async fn main() -> std::io::Result<()> {
         port_number
     );
 
-    HttpServer::new(|| App::new().route("/", web::get().to(HttpResponse::Ok)))
-        .bind(("127.0.0.1", port_number))?
-        .run()
-        .await
+    HttpServer::new(move || {
+        App::new()
+            .route("/", web::get().to(HttpResponse::Ok))
+            .service(register)
+    })
+    .bind(("127.0.0.1", port_number))?
+    .run()
+    .await
 }
