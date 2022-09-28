@@ -1,0 +1,8 @@
+{
+  "version": "0.1.0",
+  "error_mappings": {
+    "10000": "E10000 - The server couldn't get the requesting service IP address!",
+    "10001": "E10001 - The server was unable to correctly convert request data into internal data!",
+    "10002": "E10002 - Failed to parse server port from enviroment or from default \"80\""
+  }
+}

@@ -1,34 +1,37 @@
-use std::convert::{TryFrom, TryInto};
-
-use crate::models::service_info::{
-    service_info::ServiceInfo, service_info_register_dto::ServiceInfoRegisterDto,
+use crate::{
+    models::{
+        error::error_dto::ErrorDto,
+        service_info::{
+            service_info_entity::ServiceInfoEntity,
+            service_info_register_dto::ServiceInfoRegisterDto,
+        },
+    },
+    AppState,
 };
-use actix_web::{
-    get, post,
-    web::{Json, Path},
-    Error, HttpRequest, HttpResponse, Result,
-};
-
-use serde::{Deserialize, Serialize};
-
-#[derive(Deserialize, Serialize)]
-pub struct TaskIdentifier {
-    task_global_id: String,
-}
+use actix_web::{post, web::Json, HttpRequest, HttpResponse};
+use log::{debug, error};
+use std::convert::TryFrom;
 
 #[post("/registration/register")]
 pub async fn register(req: HttpRequest, body: Json<ServiceInfoRegisterDto>) -> HttpResponse {
     let mut dto = body.into_inner();
     if let Some(host_address) = req.connection_info().realip_remote_addr() {
-        dto.host.replace(host_address.to_string());
+        // dto.host.replace(host_address.to_string());
+        dto.host = None;
     } else {
-        return HttpResponse::InternalServerError()
-            .json("The server couldn't get the requesting service IP address!");
+        let error_service = &req.app_data::<AppState>().unwrap().error_service;
+        let error_entity = error_service.get_error_entity_from_code(&10000).unwrap();
+        error!("{}", error_entity.msg);
+        return HttpResponse::InternalServerError().json(ErrorDto::from(error_entity));
     }
 
-    match ServiceInfo::try_from(dto) {
+    match ServiceInfoEntity::try_from(dto) {
         Ok(entity) => HttpResponse::Created().json(entity),
-        Err(_) => HttpResponse::InternalServerError()
-            .json("The server was unable to correctly convert request data into internal data!"),
+        Err(_) => {
+            let error_service = &req.app_data::<AppState>().unwrap().error_service;
+            let error_entity = error_service.get_error_entity_from_code(&10001).unwrap();
+            error!("{}", error_entity.msg);
+            HttpResponse::InternalServerError().json(ErrorDto::from(error_entity))
+        }
     }
 }

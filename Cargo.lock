@@ -321,6 +321,7 @@ dependencies = [
  "libc",
  "num-integer",
  "num-traits",
+ "serde",
  "time 0.1.44",
  "winapi",
 ]
@@ -916,6 +917,7 @@ name = "rusty-service-discovery"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "chrono",
  "log",
  "log4rs",
  "serde",

@@ -1,9 +1,9 @@
+use super::service_info_register_dto::ServiceInfoRegisterDto;
+use log::error;
 use serde::Serialize;
 
-use super::service_info_register_dto::ServiceInfoRegisterDto;
-
 #[derive(Serialize, Debug)]
-pub struct ServiceInfo {
+pub struct ServiceInfoEntity {
     id: String,
     service_name: String,
     host: String,
@@ -13,7 +13,7 @@ pub struct ServiceInfo {
     timeout: Option<u32>,
 }
 
-impl ServiceInfo {
+impl ServiceInfoEntity {
     pub fn new(
         id: String,
         service_name: String,
@@ -22,8 +22,8 @@ impl ServiceInfo {
         health_check_endpoint: String,
         interval: Option<u32>,
         timeout: Option<u32>,
-    ) -> ServiceInfo {
-        ServiceInfo {
+    ) -> ServiceInfoEntity {
+        ServiceInfoEntity {
             id,
             service_name,
             host,
@@ -35,7 +35,7 @@ impl ServiceInfo {
     }
 }
 
-impl TryFrom<ServiceInfoRegisterDto> for ServiceInfo {
+impl TryFrom<ServiceInfoRegisterDto> for ServiceInfoEntity {
     type Error = &'static str;
 
     fn try_from(dto: ServiceInfoRegisterDto) -> Result<Self, Self::Error> {
