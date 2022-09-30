@@ -3,7 +3,7 @@ mod models;
 mod service;
 
 use actix_web::{
-    web::{self, Data},
+    web::{self},
     App, HttpResponse, HttpServer,
 };
 use apis::registration::register;
@@ -11,7 +11,6 @@ use log::info;
 use std::{env, sync::Arc};
 
 use crate::service::error_service::ErrorService;
-use actix_web::middleware::Logger;
 
 pub struct AppState {
     pub error_service: Arc<ErrorService>,

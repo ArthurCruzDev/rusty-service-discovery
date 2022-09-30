@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use serde::Deserialize;
 use serde_json::{self, Result};
 use std::collections::HashMap;
@@ -13,7 +13,7 @@ struct ErrorFile {
     error_mappings: HashMap<u16, String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct ErrorService {
     pub version: String,
     error_mapping: HashMap<u16, String>,

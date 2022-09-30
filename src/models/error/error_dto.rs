@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 

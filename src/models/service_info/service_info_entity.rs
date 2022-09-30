@@ -1,16 +1,15 @@
 use super::service_info_register_dto::ServiceInfoRegisterDto;
-use log::error;
 use serde::Serialize;
 
 #[derive(Serialize, Debug)]
 pub struct ServiceInfoEntity {
-    id: String,
-    service_name: String,
-    host: String,
-    port: u16,
-    health_check_endpoint: String,
-    interval: Option<u32>,
-    timeout: Option<u32>,
+    pub id: String,
+    pub service_name: String,
+    pub host: String,
+    pub port: u16,
+    pub health_check_endpoint: String,
+    pub interval: Option<u32>,
+    pub timeout: Option<u32>,
 }
 
 impl ServiceInfoEntity {
@@ -44,7 +43,7 @@ impl TryFrom<ServiceInfoRegisterDto> for ServiceInfoEntity {
         } else {
             Ok(Self {
                 id: dto.id,
-                service_name: dto.service_name,
+                service_name: dto.service_name.trim().to_lowercase(),
                 host: dto.host.unwrap(),
                 port: dto.port,
                 health_check_endpoint: dto.health_check_endpoint,
@@ -52,5 +51,13 @@ impl TryFrom<ServiceInfoRegisterDto> for ServiceInfoEntity {
                 timeout: dto.timeout,
             })
         }
+    }
+}
+
+impl PartialEq for ServiceInfoEntity {
+    fn eq(&self, other: &Self) -> bool {
+        self.service_name.eq_ignore_ascii_case(&other.service_name)
+            && self.host.eq_ignore_ascii_case(&other.host)
+            && self.port == other.port
     }
 }
