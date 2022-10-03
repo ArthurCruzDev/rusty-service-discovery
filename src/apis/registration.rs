@@ -25,7 +25,16 @@ pub async fn register(req: HttpRequest, body: Json<ServiceInfoRegisterDto>) -> H
     }
 
     match ServiceInfoEntity::try_from(dto) {
-        Ok(entity) => HttpResponse::Created().json(entity),
+        Ok(entity) => {
+            let registered_service = &req
+                .app_data::<AppState>()
+                .unwrap()
+                .registration_service
+                .write()
+                .unwrap()
+                .register_service(entity);
+            HttpResponse::Created().json(registered_service)
+        }
         Err(_) => {
             let error_service = &req.app_data::<AppState>().unwrap().error_service;
             let error_entity = error_service.get_error_entity_from_code(&10001).unwrap();

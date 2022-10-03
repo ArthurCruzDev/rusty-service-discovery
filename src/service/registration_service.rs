@@ -2,16 +2,22 @@ use std::{
     collections::{hash_map::Entry, BinaryHeap, HashMap},
     error::Error,
     rc::{self, Rc},
+    sync::Arc,
+    time::Duration,
 };
 
-use actix_web::dev::Service;
-use chrono::{DateTime, Duration, Utc};
+use actix_web::{
+    dev::Service,
+    rt::{spawn, time::interval},
+};
+use chrono::{DateTime, Utc};
+use log::debug;
 use uuid::Uuid;
 
 use crate::models::service_info::service_info_entity::ServiceInfoEntity;
 
 struct HealthCheckTask {
-    service: Rc<ServiceInfoEntity>,
+    service: Arc<ServiceInfoEntity>,
     next_healthcheck: DateTime<Utc>,
 }
 
@@ -37,7 +43,7 @@ impl Ord for HealthCheckTask {
 
 #[derive(Default)]
 pub struct RegistrationService {
-    registered_services: HashMap<String, Vec<Rc<ServiceInfoEntity>>>,
+    registered_services: HashMap<String, Vec<Arc<ServiceInfoEntity>>>,
     health_check_queue: BinaryHeap<HealthCheckTask>,
 }
 
@@ -49,10 +55,30 @@ impl RegistrationService {
         }
     }
 
-    pub fn register_service(&mut self, mut service: ServiceInfoEntity) -> String {
+    pub fn run(&self) {
+        let mut interval = interval(Duration::from_millis(1));
+        interval.tick().await;
+        loop {
+            interval.tick().await;
+            match self.health_check_queue.peek() {
+                None => {}
+                Some(task) => {
+                    if Utc::now()
+                        .signed_duration_since(task.next_healthcheck)
+                        .num_milliseconds()
+                        >= 0
+                    {
+                        debug!("Healthchecking service {:?}", task.service);
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn register_service(&mut self, mut service: ServiceInfoEntity) -> ServiceInfoEntity {
         service.id = Uuid::new_v4().to_string();
 
-        let rc_service = Rc::new(service);
+        let rc_service = Arc::new(service.clone());
 
         match self
             .registered_services
@@ -69,12 +95,12 @@ impl RegistrationService {
         let health_check_task = HealthCheckTask {
             service: rc_service.clone(),
             next_healthcheck: Utc::now()
-                + Duration::seconds(rc_service.interval.unwrap_or(30).into()),
+                + chrono::Duration::seconds(rc_service.interval.unwrap_or(30).into()),
         };
 
         self.health_check_queue.push(health_check_task);
 
-        rc_service.id.clone()
+        service
     }
 
     pub fn server_exists_by_id(&self, id: &String) -> Option<&ServiceInfoEntity> {

@@ -1,7 +1,7 @@
 use super::service_info_register_dto::ServiceInfoRegisterDto;
 use serde::Serialize;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 pub struct ServiceInfoEntity {
     pub id: String,
     pub service_name: String,
