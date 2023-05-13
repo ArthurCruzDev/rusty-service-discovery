@@ -10,6 +10,7 @@ pub struct ServiceInfoEntity {
     pub health_check_endpoint: String,
     pub interval: Option<u32>,
     pub timeout: Option<u32>,
+    pub health_check_fails: u8,
 }
 
 impl ServiceInfoEntity {
@@ -21,6 +22,7 @@ impl ServiceInfoEntity {
         health_check_endpoint: String,
         interval: Option<u32>,
         timeout: Option<u32>,
+        health_check_fails: u8,
     ) -> ServiceInfoEntity {
         ServiceInfoEntity {
             id,
@@ -30,6 +32,7 @@ impl ServiceInfoEntity {
             health_check_endpoint,
             interval,
             timeout,
+            health_check_fails,
         }
     }
 }
@@ -49,6 +52,7 @@ impl TryFrom<ServiceInfoRegisterDto> for ServiceInfoEntity {
                 health_check_endpoint: dto.health_check_endpoint,
                 interval: dto.interval,
                 timeout: dto.timeout,
+                health_check_fails: 0,
             })
         }
     }

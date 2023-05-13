@@ -3,7 +3,6 @@ mod models;
 mod service;
 
 use actix_web::{
-    rt::spawn,
     web::{self},
     App, HttpResponse, HttpServer,
 };
